@@ -14,4 +14,4 @@ python3 run.py
 ## サンプル
 
 ### sample00001_hutiduke.py
-outputフォルダにあるpngに白い輪郭を14pxつけてoutputフォルダに入れる
+inputフォルダにあるpngに白い輪郭を14pxつけてoutputフォルダに入れる
