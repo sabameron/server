@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>シンプルファイルアップローダー</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            background: #f9f9f9;
+        }
+        #file-list {
+            margin-top: 20px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>シンプルファイルアップローダー</h1>
+    
+    <div class="upload-area">
+        <h3>ファイルをドラッグ＆ドロップするか、クリックして選択</h3>
+        <input type="file" id="fileInput" multiple style="display: none;">
+        <button id="selectButton">ファイルを選択</button>
+    </div>
+    
+    <div id="file-list">
+        <h3>アップロード済みファイル</h3>
+        <ul id="uploaded-files"></ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.querySelector('.upload-area');
+            const fileInput = document.getElementById('fileInput');
+            const selectButton = document.getElementById('selectButton');
+            const uploadedFilesList = document.getElementById('uploaded-files');
+            
+            // ドラッグ&ドロップイベント
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = '#e9e9e9';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.background = '#f9f9f9';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = '#f9f9f9';
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+            
+            // ファイル選択ボタン
+            selectButton.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', () => {
+                handleFiles(fileInput.files);
+            });
+            
+            // ファイル処理
+            function handleFiles(files) {
+                for (const file of files) {
+                    uploadFile(file);
+                }
+            }
+            
+            // ファイルアップロード処理
+            function uploadFile(file) {
+                const li = document.createElement('li');
+                li.textContent = `${file.name} (${formatFileSize(file.size)}) - アップロード中...`;
+                uploadedFilesList.appendChild(li);
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    }
+                    throw new Error('アップロード失敗');
+                })
+                .then(() => {
+                    li.textContent = `${file.name} (${formatFileSize(file.size)})`;
+                    li.classList.add('success');
+                })
+                .catch(error => {
+                    li.textContent = `${file.name} - ${error.message}`;
+                    li.classList.add('error');
+                });
+            }
+            
+            // ファイルサイズフォーマット
+            function formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+                else if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + ' MB';
+                else return (bytes / 1073741824).toFixed(2) + ' GB';
+            }
+        });
+    </script>
+</body>
+</html>
