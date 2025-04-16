@@ -2,6 +2,7 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 import cgi
 import os
 import sys
+import socket
 
 class UploadHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -48,10 +49,25 @@ class UploadHandler(SimpleHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
+def get_ip_address():
+    """ローカルIPアドレスを取得する関数"""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # 外部に接続しようとすることでローカルIPを取得（実際には接続しない）
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = '127.0.0.1'  # 接続できない場合はループバックアドレスを返す
+    finally:
+        s.close()
+    return ip
+
 def run_server(port=8002):
     server_address = ('', port)
     httpd = HTTPServer(server_address, UploadHandler)
-    print(f"サーバーを開始: http://localhost:{port}/")
+    ip = get_ip_address()
+    print(f"サーバーを開始: http://{ip}:{port}/")
+    print(f"ローカルアクセス: http://localhost:{port}/")
     httpd.serve_forever()
 
 if __name__ == '__main__':
