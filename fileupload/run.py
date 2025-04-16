@@ -37,14 +37,16 @@ class UploadHandler(SimpleHTTPRequestHandler):
                 
                 # 結果を返す
                 self.send_response(200)
-                self.send_header('Content-type', 'text/plain')
+                self.send_header('Content-type', 'text/plain; charset=utf-8')
                 self.end_headers()
-                self.wfile.write(f"ファイル '{file_name}' がアップロードされました。".encode())
+                message = f"ファイル '{file_name}' がアップロードされました。"
+                self.wfile.write(message.encode('utf-8'))
             else:
                 self.send_response(400)
-                self.send_header('Content-type', 'text/plain')
+                self.send_header('Content-type', 'text/plain; charset=utf-8')
                 self.end_headers()
-                self.wfile.write(b"エラー: ファイルが見つかりません。")
+                message = "エラー: ファイルが見つかりません。"
+                self.wfile.write(message.encode('utf-8'))
         else:
             self.send_response(404)
             self.end_headers()
